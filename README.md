@@ -78,6 +78,14 @@ calibration are built and working. A multi-file edit workflow (plan → dispatch
 → per-file diff review, across several files at once) is designed but not yet
 implemented — see the Extension Points table in the architecture doc.
 
+## Code availability
+
+This repository currently holds documentation only — this README and
+[`docs/architecture.md`](docs/architecture.md) — the source code itself
+hasn't been published here yet. Everything above (features, measured results,
+screenshots) describes a working build; the setup steps below show how it
+runs once the `backend/` and `frontend/` source is released.
+
 ## Running it locally
 
 **1. LM Studio** — load a model and start its local server (default
