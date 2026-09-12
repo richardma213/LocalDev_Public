@@ -55,6 +55,8 @@ and barely benefits, and the factor hasn't been separately validated for
 other estimates in the app (like compaction's, below) that use a different
 formula.
 
+![Token-estimate calibration: k-fold cross-validated correction factors, cutting mean relative error from 10.8% to ~4.5–4.8% and raising R² from 0.948 to 0.989](images/token-calibration.png)
+
 **On-demand context compaction** — across 20 real uses of the "Compact"
 button (both chats, logged automatically), the median before÷after size
 reduction is **6.4×**, for roughly **25.9k tokens** saved in total.
@@ -64,6 +66,8 @@ the ratio algebraically. The absolute token count is a best-effort estimate,
 not a validated figure. Compaction is also destructive by design (folded-away
 messages are gone from the stored thread, not just hidden), which is why it's
 a manual, on-demand action rather than automatic.
+
+![Compaction stats panel: 20 compactions logged, 25,863 total tokens saved, mean ratio 7.34×, median ratio 6.40×](images/context-compaction-stats.png)
 
 ## Status
 
