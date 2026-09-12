@@ -36,6 +36,35 @@ sends it in the request body.
   against the model's real reported usage on every request and corrected with
   a measured, cross-validated factor — not just guessed.
 
+## Measured results
+
+Two of the features above are backed by real, automatically-logged usage data
+rather than one-off examples. Full methodology in
+[`docs/architecture.md`](docs/architecture.md) (§6 for calibration, §8 for
+compaction).
+
+**Token-estimate calibration** — the chat's token-budget meter is a cheap
+`chars ÷ 3.8` heuristic. Every real generation's actual token count (from the
+model itself) gets logged alongside what the heuristic predicted, and a
+k-fold cross-validated correction factor is fit offline — the error numbers
+below are *held-out*, not training-set fit. Across 30 real edit-mode
+generations, this cuts mean error from 11% to 5%.
+*Tradeoff:* the correction is specific to edit-mode's prompt shape (raw code,
+no line-numbering) — chat mode was already well-calibrated at baseline (~7%)
+and barely benefits, and the factor hasn't been separately validated for
+other estimates in the app (like compaction's, below) that use a different
+formula.
+
+**On-demand context compaction** — across 20 real uses of the "Compact"
+button (both chats, logged automatically), the median before÷after size
+reduction is **6.4×**, for roughly **25.9k tokens** saved in total.
+*Tradeoff:* the 6.4× ratio is estimator-independent by construction — both
+sides use the same token-counting heuristic, so its accuracy cancels out of
+the ratio algebraically. The absolute token count is a best-effort estimate,
+not a validated figure. Compaction is also destructive by design (folded-away
+messages are gone from the stored thread, not just hidden), which is why it's
+a manual, on-demand action rather than automatic.
+
 ## Status
 
 Actively developed. Editor chat, main chat, RAG, compression, compaction, and
