@@ -14,6 +14,8 @@ sends it in the request body.
 > Full technical reference (state architecture, request lifecycle, persistence
 > map, every module's job): [`docs/architecture.md`](docs/architecture.md).
 
+![LocalDev main page: Monaco editor with an open workspace folder alongside the chat panel](images/main-page.png)
+
 ## What it does
 
 - **Two chat surfaces.** A per-file chat pane in the editor (anchored to the
