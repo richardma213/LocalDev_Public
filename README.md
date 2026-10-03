@@ -1,15 +1,16 @@
 # LocalDev
 
-A local-first AI coding assistant — a React code editor and chat UI backed by a
-FastAPI server, talking entirely to a **local** LLM through
-[LM Studio](https://lmstudio.ai/) (tested with `qwen2.5-7b-instruct-1m`). No
-cloud API calls, no API keys, no telemetry — your code and conversations never
-leave your machine.
+A local-first AI coding assistant built around a small model: a React editor
+and chat UI in the browser, a stateless FastAPI backend, and a 7B model running
+in [LM Studio](https://lmstudio.ai/) (tested with Qwen2.5-7B-Instruct at an 8k
+context window). No cloud calls, no API keys, no telemetry. Your code never
+leaves your machine.
 
-The workspace folder is opened and read **in the browser** via the File System
-Access API. The backend is a thin, stateless wrapper around the local model; it
-never sees your files or paths — the frontend assembles everything it needs and
-sends it in the request body.
+The interesting part is that constraint. A 7B model with 8k tokens of context
+is unreliable at long context, multi-step planning, and sticking to an output
+format. Instead of prompting around that, LocalDev keeps every model call
+narrow and moves everything that needs reliability (reading files, ranking,
+applying and checking edits) into ordinary, testable code.
 
 > Full technical reference (state architecture, request lifecycle, persistence
 > map, every module's job): [`docs/architecture.md`](docs/architecture.md).
@@ -18,25 +19,47 @@ sends it in the request body.
 
 ## What it does
 
-- **Two chat surfaces.** A per-file chat pane in the editor (anchored to the
-  open buffer, auto/chat/edit modes) and a general main chat — sharing one
-  workspace folder handle, independent transcripts.
-- **Real file access from the browser.** Open a local folder, browse/edit
-  files with a Monaco editor, save straight back to disk — no upload, no
-  server-side file storage.
-- **Retrieval-augmented context (RAG).** A hand-rolled, dependency-free BM25
-  lexical index over the open workspace, built and persisted in IndexedDB.
-  Every message auto-attaches the most relevant chunks from elsewhere in the
-  project — no embeddings, no extra model call to retrieve.
-- **Context compression.** Resolved edit-mode turns collapse to a short
-  placeholder once the conversation has moved past them, so old diffs don't
-  keep eating the context budget.
-- **On-demand compaction.** A `/compact`-style button that summarizes older
-  history into one message, streamed live, with real usage stats (compression
-  ratio, tokens saved) logged automatically and shown in Settings.
-- **A calibrated token meter.** The chat's token-budget estimate is checked
-  against the model's real reported usage on every request and corrected with
-  a measured, cross-validated factor — not just guessed.
+- **Chat about your code.** A main chat (any number of chats per project) and
+  a per-file chat beside the editor. Replies stream in, render as Markdown with
+  math, and keep streaming if you switch chats or pages.
+- **Edit mode.** Ask for a change to one file and review it as a diff before
+  anything is written.
+- **Multi-file edits.** Describe a change. LocalDev picks the files, edits each
+  one in its own focused call, checks every result, and opens a diff review
+  where flagged files start unchecked and any file can be retried on its own.
+- **Real files, from the browser.** Open a local folder (File System Access
+  API), edit in Monaco, save straight to disk. The backend never sees a file
+  or a path.
+- **Retrieval (RAG).** A dependency-free BM25 index over the workspace attaches
+  the most relevant chunks to each message. No embeddings, no extra model call.
+- **Context management.** History is trimmed to a token budget, old edit replies
+  collapse to short placeholders, and a Compact button summarizes older history
+  into one message.
+
+## How it works
+
+- **The browser owns the files.** It reads the workspace, chooses context, and
+  sends everything the model needs in the request. The backend keeps no state:
+  it builds the prompt and streams the reply.
+- **One pipeline for every chat.** Every chat is a thread in one store, and
+  every turn runs through one engine: add an empty reply, build the request
+  with a pure function, stream tokens into the reply. Stop, errors, and
+  switching pages behave the same in every chat.
+- **Streaming end to end.** LM Studio streams Server-Sent Events; the backend
+  turns them into newline-delimited JSON events; the frontend reads every
+  endpoint with one shared stream reader.
+- **Multi-file edit is plan, then execute.**
+  1. BM25 plus the import graph narrows the workspace to candidate files.
+  2. A planner call sees those paths and a token-budgeted repo map (imports,
+     "used by" links, related declarations) and answers with one
+     `path :: instruction` line per file, streamed as it decides.
+  3. The browser reads only the planned files.
+  4. Each file gets its own call that also sees the full request and plan.
+     Small files are rewritten; larger ones are edited with SEARCH/REPLACE
+     blocks that apply only on an exact match, with one repair call and a
+     full-rewrite fallback.
+  5. Checks flag truncated, placeholder, shrunk, unchanged, or partly applied
+     edits before review.
 
 ## Measured results
 
@@ -71,12 +94,31 @@ a manual, on-demand action rather than automatic.
 
 ![Compaction stats panel: 20 compactions logged, 25,863 total tokens saved, mean ratio 7.34×, median ratio 6.40×](images/context-compaction-stats.png)
 
+## Project layout
+
+```
+frontend/src/
+  pages/           one component per route: Chat, Editor, Settings, Info
+  components/      UI: review modals, Markdown rendering, editor panes
+  lib/chat/        thread store, the shared turn engine, chat lists
+  lib/api/         backend calls and the shared NDJSON stream reader
+  lib/rag/         tokenizer, chunker, BM25, repo-map outlines
+  lib/multiEdit/   multi-file edit run state and planner candidates
+  lib/editor/      folder access, tabs, Monaco setup
+backend/
+  routes/          one file per feature: chat, editor_chat, multi_edit, compact, edit
+  llm.py           LM Studio streaming client
+  apply_edits.py · edit_format.py · edit_checks.py   SEARCH/REPLACE and output checks
+  tests/           pytest
+bench/             offline analysis of the token logs
+```
+
 ## Status
 
-Actively developed. Editor chat, main chat, RAG, compression, compaction, and
-calibration are built and working. A multi-file edit workflow (plan → dispatch
-→ per-file diff review, across several files at once) is designed but not yet
-implemented — see the Extension Points table in the architecture doc.
+Actively developed. Built and working: both chats, Edit and multi-file edit,
+RAG, compression, Compact, and token logging. Next: SEARCH/REPLACE for
+single-file Edit mode, then an eval harness for multi-file edit (a fixture repo
+plus scored prompts) so there are measured results for it too.
 
 ## Code availability
 
