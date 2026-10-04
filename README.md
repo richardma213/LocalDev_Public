@@ -116,9 +116,10 @@ bench/             offline analysis of the token logs
 ## Status
 
 Actively developed. Built and working: both chats, Edit and multi-file edit,
-RAG, compression, Compact, and token logging. Next: SEARCH/REPLACE for
-single-file Edit mode, then an eval harness for multi-file edit (a fixture repo
-plus scored prompts) so there are measured results for it too.
+RAG, compression, Compact, token logging, and an eval harness for multi-file
+edit. Multi-file edit uses SEARCH/REPLACE blocks for larger files, which keeps
+long edits fast. Next: SEARCH/REPLACE for single-file Edit mode, which doesn't
+use it yet, and publishing the multi-file eval results here.
 
 ## Code availability
 
