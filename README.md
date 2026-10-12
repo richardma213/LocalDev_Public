@@ -17,6 +17,8 @@ applying and checking edits) into ordinary, testable code.
 
 ## Demo video
 
+Link: [https://youtu.be/0dGC5F_jCKM](https://youtu.be/0dGC5F_jCKM)
+
 [![Watch the LocalDev demo](https://img.youtube.com/vi/0dGC5F_jCKM/sddefault.jpg)](https://youtu.be/0dGC5F_jCKM)
 
 *Short 2-minute demo video on a sample repository.*
