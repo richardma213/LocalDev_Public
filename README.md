@@ -15,11 +15,17 @@ applying and checking edits) into ordinary, testable code.
 > Full technical reference (state architecture, request lifecycle, persistence
 > map, every module's job): [`docs/architecture.md`](docs/architecture.md).
 
-[![Watch the LocalDev demo](https://img.youtube.com/vi/0dGC5F_jCKM/maxresdefault.jpg)](https://youtu.be/0dGC5F_jCKM)
+## Demo video
+
+[![Watch the LocalDev demo](https://img.youtube.com/vi/0dGC5F_jCKM/sddefault.jpg)](https://youtu.be/0dGC5F_jCKM)
 
 *Short 2-minute demo video on a sample repository.*
 
+## Screenshots
+
 ![LocalDev main page: Monaco editor with an open workspace folder alongside the chat panel](images/main-page.png)
+
+*The editor with an open workspace folder, next to the per-file chat.*
 
 ## What it does
 
