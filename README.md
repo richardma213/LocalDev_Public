@@ -15,18 +15,26 @@ applying and checking edits) into ordinary, testable code.
 > Full technical reference (state architecture, request lifecycle, persistence
 > map, every module's job): [`docs/architecture.md`](docs/architecture.md).
 
+[![Watch the LocalDev demo](https://img.youtube.com/vi/0dGC5F_jCKM/maxresdefault.jpg)](https://youtu.be/0dGC5F_jCKM)
+
+*Short 2-minute demo video on a sample repository.*
+
 ![LocalDev main page: Monaco editor with an open workspace folder alongside the chat panel](images/main-page.png)
 
 ## What it does
 
 - **Chat about your code.** A main chat (any number of chats per project) and
-  a per-file chat beside the editor. Replies stream in, render as Markdown with
-  math, and keep streaming if you switch chats or pages.
-- **Edit mode.** Ask for a change to one file and review it as a diff before
-  anything is written.
-- **Multi-file edits.** Describe a change. LocalDev picks the files, edits each
-  one in its own focused call, checks every result, and opens a diff review
-  where flagged files start unchecked and any file can be retried on its own.
+  a per-file chat beside the editor, where each file has its own. Replies
+  stream in, render as Markdown with math, and keep streaming if you switch
+  chats or pages.
+- **Edit mode.** Ask for a change to one file and review it as a diff. Nothing
+  is written until you accept it.
+- **Multi-file edits.** A mode in the main chat. Describe a change and
+  LocalDev plans which files need to change (streamed as it decides), edits
+  each one in its own focused call, checks every result, and opens a diff
+  review. Each file shows how it was edited and how long it took, flagged files
+  start unchecked, and any file can be retried on its own. Nothing is written
+  until you apply.
 - **Real files, from the browser.** Open a local folder (File System Access
   API), edit in Monaco, save straight to disk. The backend never sees a file
   or a path.
@@ -118,8 +126,7 @@ bench/             offline analysis of the token logs
 Actively developed. Built and working: both chats, Edit and multi-file edit,
 RAG, compression, Compact, token logging, and an eval harness for multi-file
 edit. Multi-file edit uses SEARCH/REPLACE blocks for larger files, which keeps
-long edits fast. Next: SEARCH/REPLACE for single-file Edit mode, which doesn't
-use it yet, and publishing the multi-file eval results here.
+long edits fast. 
 
 ## Code availability
 
